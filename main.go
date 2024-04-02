@@ -2,14 +2,18 @@ package main
 
 import (
 	"bufio"
-	"fmt"
 	"os"
+	"strconv"
 	"strings"
 )
 
 func main() {
-	fmt.Println("hello world")
-	file,err := os.Open("./measurements.txt")
+    parseMeasurements("dummy.txt")
+
+}
+
+func parseMeasurements(path string){
+	file,err := os.Open(path)
 
 	if err != nil{
 		panic("couldn't open file")
@@ -19,43 +23,49 @@ func main() {
 
 	var stations []station 
 
-	for scanner.Scan(){
+	for scanner.Scan() {
+		
 		line := strings.Split(scanner.Text(),";")
+		existing_station := stationExists(stations,line)
+		value,err := strconv.ParseFloat(line[1],32)
+			
+		if err != nil{
+			panic("Couldn't parse float")
+		}
 
-		if !stationExists(stations,line) {
+		if existing_station == nil {
 			stations = append(
 				stations, 
 				station{
 					name: line[0],
-					max: 20.0,
-					min:20.0,
-					count: 10,
-					sum: 500,
+					max: value,
+					min: value,
+					count: 1,
+					sum: value,
 	
 				},
-			)
+			) 
 		} else {
-
+			calculate(existing_station,value)
 		}
-
-		
 	}
+
 }
 
-func stationExists(stations []station,line []string) bool{
-	for _,station := range stations{
+func stationExists(stations []station,line []string) *station{
+	for i,station := range stations{
 		if station.name == line[0] {
-			return true
+			return &stations[i]
 		}
 	}
 
-	return false
+	return nil
 }
 
-type station struct{
-	name string
-	max float32
-	min float32
-	sum int
-	count int
+func calculate(station *station,num float64){
+	station.min = min(station.min,num)
+	station.max = max(station.max,num)
+	station.sum += num
+	station.count ++
 }
+
