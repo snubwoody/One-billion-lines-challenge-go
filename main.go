@@ -8,8 +8,8 @@ import (
 )
 
 func main() {
-    parseMeasurements("dummy.txt")
-
+	profile()
+    parseMeasurements("text-files/dummy.txt")
 }
 
 func parseMeasurements(path string){
@@ -46,10 +46,12 @@ func parseMeasurements(path string){
 				},
 			) 
 		} else {
-			calculate(existing_station,value)
+			existing_station.calculateMax(value)
+			existing_station.calculateMin(value)
+			existing_station.calculateMean(value)
 		}
 	}
-
+	
 }
 
 func stationExists(stations []station,line []string) *station{
@@ -67,5 +69,6 @@ func calculate(station *station,num float64){
 	station.max = max(station.max,num)
 	station.sum += num
 	station.count ++
+	station.mean = station.sum/station.count
 }
 
