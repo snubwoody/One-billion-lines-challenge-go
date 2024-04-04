@@ -22,7 +22,7 @@ func main() {
 	}
 	defer pprof.StopCPUProfile()
 
-    parseMeasurements("text-files/measurements.txt")
+    parseMeasurements("text-files/dummy.txt")
 }
 
 func parseMeasurements(path string){
@@ -41,7 +41,7 @@ func parseMeasurements(path string){
 		index := strings.Index(scanner.Text(),";")
 		name := scanner.Text()[:index]
 		
-		value,err := strconv.ParseFloat(scanner.Text()[index+1:],64)
+		value,err := strconv.ParseFloat(scanner.Text()[index+1:],32)
 
 		existing_station := stationExists(stations,name)
 			
