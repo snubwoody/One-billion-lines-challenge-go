@@ -2,14 +2,27 @@ package main
 
 import (
 	"bufio"
+	"log"
 	"os"
+	"runtime/pprof"
 	"strconv"
 	"strings"
 )
 
 func main() {
-	profile()
-    parseMeasurements("text-files/dummy.txt")
+
+	f, err := os.Create("cpu.prof")
+	if err != nil {
+		log.Fatal("could not create CPU profile: ", err)
+	}
+	defer f.Close()
+
+	if err := pprof.StartCPUProfile(f); err != nil {
+		log.Fatal("could not start CPU profile: ", err)
+	}
+	defer pprof.StopCPUProfile()
+
+    parseMeasurements("text-files/measurements.txt")
 }
 
 func parseMeasurements(path string){
@@ -25,9 +38,12 @@ func parseMeasurements(path string){
 
 	for scanner.Scan() {
 		
-		line := strings.Split(scanner.Text(),";")
-		existing_station := stationExists(stations,line)
-		value,err := strconv.ParseFloat(line[1],32)
+		index := strings.Index(scanner.Text(),";")
+		name := scanner.Text()[:index]
+		
+		value,err := strconv.ParseFloat(scanner.Text()[index+1:],64)
+
+		existing_station := stationExists(stations,name)
 			
 		if err != nil{
 			panic("Couldn't parse float")
@@ -37,7 +53,7 @@ func parseMeasurements(path string){
 			stations = append(
 				stations, 
 				station{
-					name: line[0],
+					name: name,
 					max: value,
 					min: value,
 					count: 1,
@@ -54,9 +70,10 @@ func parseMeasurements(path string){
 	
 }
 
-func stationExists(stations []station,line []string) *station{
+func stationExists(stations []station,name string) *station{
+	//TODO find a faster method to check stations
 	for i,station := range stations{
-		if station.name == line[0] {
+		if station.name == name {
 			return &stations[i]
 		}
 	}
@@ -69,6 +86,6 @@ func calculate(station *station,num float64){
 	station.max = max(station.max,num)
 	station.sum += num
 	station.count ++
-	station.mean = station.sum/station.count
+	station.mean = station.sum / station.count
 }
 
