@@ -1,0 +1,1 @@
+I learnt a lot from this project. Mostly the importance of profiling and benchmarking. I've never been in a project where perfomance was the most importance thing so I never really focused on it.

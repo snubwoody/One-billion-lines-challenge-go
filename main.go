@@ -22,7 +22,8 @@ func main() {
 	}
 	defer pprof.StopCPUProfile()
 
-    parseMeasurements("text-files/dummy.txt")
+    //parseMeasurements("text-files/dummy.txt")
+    parseMeasurementsV2("text-files/dummy.txt")
 }
 
 func parseMeasurements(path string){
@@ -66,8 +67,47 @@ func parseMeasurements(path string){
 			existing_station.calculateMin(value)
 			existing_station.calculateMean(value)
 		}
+	}	
+}
+
+func parseMeasurementsV2(path string){
+	file,err := os.Open(path)
+
+	if err != nil{
+		panic("couldn't open file")
 	}
-	
+
+	scanner := bufio.NewScanner(file)
+
+	stations := make(map[string]station)
+
+	for scanner.Scan() {
+		
+		index := strings.Index(scanner.Text(),";")
+		name := scanner.Text()[:index]
+		
+		value,err := strconv.ParseFloat(scanner.Text()[index+1:],32)
+
+		if err != nil{
+			panic("Couldn't parse float")
+		}
+
+		if existing_station, ok := stations[name]; ok {
+			existing_station.calculateMax(value)
+			existing_station.calculateMin(value)
+			existing_station.calculateMean(value)
+			stations[name] = existing_station
+		} else{
+			stations[name] = station{
+				name: name,
+				max: value,
+				min: value,
+				count: 1,
+				sum: value,
+
+			}
+		}
+	}	
 }
 
 func stationExists(stations []station,name string) *station{
